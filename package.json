@@ -1,0 +1,16 @@
+{
+  "name": "voidcsv",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "concurrently -k \"pnpm --dir web run dev\" \"pnpm --dir engine run dev\"",
+    "build": "pnpm --dir web run build",
+    "start": "pnpm --dir engine run start",
+    "clean": "rimraf web/dist engine/dist uploads"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "rimraf": "^6.0.1"
+  }
+}
+

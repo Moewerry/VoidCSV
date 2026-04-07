@@ -1,0 +1,108 @@
+:root{
+  --bg0:#07090b;
+  --bg1:#0b0f14;
+  --panel:#0e141c;
+  --panel2:#0a1017;
+  --text:#cdd6e0;
+  --muted:#7f8a97;
+  --border: rgba(255,255,255,0.08);
+  --accent:#22d3ee; /* 青绿 */
+  --accent2:#7c3aed; /* 紫 */
+  --danger:#fb7185;
+  --ok:#34d399;
+}
+
+html,body{
+  height:100%;
+  background: radial-gradient(1200px circle at 15% 10%, rgba(124,58,237,0.14), transparent 55%),
+              radial-gradient(900px circle at 85% 30%, rgba(34,211,238,0.12), transparent 50%),
+              var(--bg0);
+  color: var(--text);
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+
+*{ box-sizing:border-box; }
+
+a{ color:inherit; }
+
+button, input, select{
+  font: inherit;
+}
+
+.app-shell{
+  /* 由于这里使用了 zoom:200%，布局高度也会随之放大；
+     把最小高度减半，避免额外产生页面上下滚动。 */
+  min-height:50vh;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 35%);
+  /* 全局字体/界面缩放：确保行内写死的 fontSize 也能跟着放大 */
+  zoom: 200%;
+}
+
+.panel{
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.btn{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform .05s ease, border-color .15s ease, background .15s ease;
+}
+.btn:hover{
+  border-color: rgba(34,211,238,0.35);
+  background: rgba(34,211,238,0.06);
+}
+.btn:active{ transform: translateY(1px); }
+.btn-primary{
+  border-color: rgba(34,211,238,0.5);
+  background: linear-gradient(135deg, rgba(34,211,238,0.18), rgba(124,58,237,0.14));
+}
+.btn-danger{
+  border-color: rgba(251,113,133,0.45);
+  background: rgba(251,113,133,0.08);
+}
+
+.input{
+  width: 100%;
+  border-radius: 12px;
+  border:1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  padding: 10px 12px;
+}
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--muted);
+}
+
+.kbd{
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border:1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.2);
+  color: var(--text);
+}
+
+.topbar{
+  padding: 16px 18px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
