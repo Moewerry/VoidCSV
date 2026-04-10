@@ -196,8 +196,8 @@ function Modal(props: { title: string; children: React.ReactNode; actions: React
   return (
     <div className="overlay" role="dialog" aria-modal="true">
       <div className="modal">
-        <div className="modal-title">{props.title}</div>
-        <div style={{ marginTop: 10, color: 'var(--muted)', lineHeight: 1.7, fontSize: 13 }}>{props.children}</div>
+        <div className="modal-title" style={{ fontSize: 24 }}>{props.title}</div>
+        <div style={{ marginTop: 10, color: 'var(--muted)', lineHeight: 1.75, fontSize: 16 }}>{props.children}</div>
         <div className="modal-actions">{props.actions}</div>
       </div>
     </div>
@@ -217,6 +217,8 @@ export default function Viewer() {
   const [encoding, setEncoding] = useState('utf8')
 
   const [showEnginePrompt, setShowEnginePrompt] = useState(false)
+  const [showReparseConfirm, setShowReparseConfirm] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [activeParseMode, setActiveParseMode] = useState<'frontend' | 'engine' | null>(null)
 
   const [busy, setBusy] = useState(false)
@@ -332,23 +334,53 @@ export default function Viewer() {
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
 
+  useEffect(() => {
+    // 预览弹层打开时锁定背景页面滚动，避免“底层页面也在滚”
+    const prevHtmlOverflow = document.documentElement.style.overflow
+    const prevBodyOverflow = document.body.style.overflow
+    if (previewOpen) {
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.documentElement.style.overflow = prevHtmlOverflow
+      document.body.style.overflow = prevBodyOverflow
+    }
+    return () => {
+      document.documentElement.style.overflow = prevHtmlOverflow
+      document.body.style.overflow = prevBodyOverflow
+    }
+  }, [previewOpen])
+
   const colWidthForRender = useMemo(() => {
     if (!previewOpen) return colWidth
-    if (previewMode === 'fullscreen') return Math.round(colWidth * 1.28)
+    // 全屏与放大预览使用同一套表格尺度，避免体验割裂
     return Math.round(colWidth * 1.15)
-  }, [previewOpen, previewMode, colWidth])
+  }, [previewOpen, colWidth])
 
   const itemSizeForRender = useMemo(() => {
     if (!previewOpen) return 32
-    if (previewMode === 'fullscreen') return 36
+    // 全屏与放大预览统一行高
     return 34
-  }, [previewOpen, previewMode])
+  }, [previewOpen])
 
   const listHeightForRender = useMemo(() => {
     if (!previewOpen) return 620
     const pad = previewMode === 'fullscreen' ? 0 : 52
     return Math.max(420, viewportH - pad - 110)
   }, [previewOpen, previewMode, viewportH])
+
+  const previewListHeight = useMemo(() => {
+    if (!previewOpen) return 620
+    // 全屏与放大预览统一可视高度策略
+    const height = viewportH * 0.89
+    return Math.max(400, Math.min(height, viewportH - 60))
+  }, [previewOpen, viewportH])
+
+  const previewTableAreaHeight = useMemo(() => {
+    // 表头高度改为动态获取（或固定 48px，预留更多余量）
+    const headerHeight = 48
+    return previewListHeight + headerHeight
+  }, [previewListHeight])
 
   async function parseFrontend(csvFile: File, options?: { headPreview?: boolean }) {
     const myToken = parseTokenRef.current
@@ -796,8 +828,30 @@ export default function Viewer() {
     }
   }
 
+  function isSameFile(a: File, b: File) {
+    return a.name === b.name && a.size === b.size && a.lastModified === b.lastModified
+  }
+
+  function handleFileWithConfirm(f: File) {
+    if (file && isSameFile(file, f)) {
+      setPendingFile(f)
+      setShowReparseConfirm(true)
+      return
+    }
+    handleFile(f)
+  }
+
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] || null
+    e.currentTarget.value = ''
+    if (!f) return
+    handleFileWithConfirm(f)
+  }
+
+  function confirmReparseSameFile() {
+    const f = pendingFile
+    setShowReparseConfirm(false)
+    setPendingFile(null)
     if (!f) return
     handleFile(f)
   }
@@ -842,7 +896,7 @@ export default function Viewer() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ fontSize: '150%' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
       <button type="button" className="btn" onClick={() => navigate('/')}>
@@ -861,8 +915,8 @@ export default function Viewer() {
     >
             <div>
               <div style={{ fontWeight: 900, fontSize: 18 }}>CSV Viewer</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
-                主题：高级黑色 · 混合模式：自动检测文件大小，小文件纯前端，大文件提示启用本地引擎
+              <div style={{ color: 'var(--muted)', fontSize: 16, marginTop: 4 }}>
+                自动检测文件大小，小文件纯前端，大文件提示启用本地引擎
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -882,7 +936,7 @@ export default function Viewer() {
             <div className="controls">
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
-                  <div className="label">选择 CSV 文件</div>
+                  {/* <div className="label">选择 CSV 文件</div> */}
                     <div
                       className={`dropzone ${dragOver ? 'drag' : ''}`}
                       onDragEnter={(e) => {
@@ -901,7 +955,7 @@ export default function Viewer() {
                         setDragOver(false)
                         const f = e.dataTransfer.files?.[0]
                         if (!f) return
-                        handleFile(f)
+                        handleFileWithConfirm(f)
                       }}
                     >
                       <input
@@ -971,7 +1025,7 @@ export default function Viewer() {
                       value={engineMode}
                       onChange={(v) => setEngineMode(v as EngineMode)}
                       options={[
-                        { value: 'auto', label: 'auto（混合版）' },
+                        { value: 'auto', label: 'auto' },
                         { value: 'engine', label: '启用本地引擎' },
                         { value: 'frontend', label: '纯前端预览' },
                       ]}
@@ -982,8 +1036,8 @@ export default function Viewer() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <span className="label">阈值</span>
                   <input
-                    className="input"
-                    style={{ width: 120 }}
+                    className="input threshold-input"
+                    style={{ width: 120, fontSize: 16 }}
                     type="number"
                     min={10}
                     step={10}
@@ -995,7 +1049,7 @@ export default function Viewer() {
               </div>
 
               {file ? (
-                <div style={{ marginTop: 10, color: 'var(--muted)', fontSize: 13 }}>
+                <div style={{ marginTop: 10, color: 'var(--muted)', fontSize: 16 }}>
                   <div className="file-meta-line">
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       文件：<span className="file-name-ellipsis" style={{ color: 'var(--text)' }}>{file.name}</span> · 大小：{fileSizeText}
@@ -1019,8 +1073,8 @@ export default function Viewer() {
                   ) : null}
                 </div>
               ) : (
-                <div className="help" style={{ marginTop: 10 }}>
-                  首页点击进入后，在这里选择文件（也可以直接拖拽）。小文件用纯前端解析；大文件会弹出启用本地引擎的提示。
+                <div className="help" style={{ marginTop: 10,fontSize: 16 }}>
+                  小文件用纯前端解析，大文件会弹出启用本地引擎的提示
                 </div>
               )}
             </div>
@@ -1030,7 +1084,7 @@ export default function Viewer() {
         {error ? (
           <div className="panel" style={{ padding: 14, marginTop: 12, borderColor: 'rgba(251,113,133,0.45)' }}>
             <div style={{ fontWeight: 800, color: 'var(--danger)' }}>错误</div>
-            <div style={{ marginTop: 6, color: 'var(--muted)', lineHeight: 1.6, fontSize: 13 }}>{error}</div>
+            <div style={{ marginTop: 6, color: 'var(--muted)', lineHeight: 1.6, fontSize: 16 }}>{error}</div>
           </div>
         ) : null}
 
@@ -1040,11 +1094,11 @@ export default function Viewer() {
             style={{
               padding: 12,
               marginTop: 12,
-              borderColor: 'rgba(74,217,222,0.22)',
-              background: 'rgba(74,217,222,0.06)',
+              borderColor: 'rgba(16,185,129,0.28)',
+              background: 'rgba(16,185,129,0.08)',
             }}
           >
-            <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.65 }}>
+            <div style={{ fontSize: 16, color: 'var(--muted)', lineHeight: 1.65 }}>
               当前为<strong style={{ color: 'var(--text)' }}> 文件开头预览 </strong>
               （约前 {formatBytes(QUICK_PREVIEW_HEAD_BYTES)}，不上传整文件）。若最后一行被截断，属正常现象。需要全文随机访问请使用
               {engineMode === 'engine' ? (
@@ -1072,22 +1126,22 @@ export default function Viewer() {
                 </span>
               </span>
               {headPreviewOnly ? (
-                <span className="tag" style={{ borderColor: 'rgba(74,217,222,0.22)' }}>
+                <span className="tag" style={{ borderColor: 'rgba(16,185,129,0.28)' }}>
                   开头片段预览（≈{formatBytes(QUICK_PREVIEW_HEAD_BYTES)}）
                 </span>
               ) : null}
               {activeParseMode === 'frontend' && frontendTruncated ? (
-                <span className="tag" style={{ borderColor: 'rgba(74,217,222,0.22)' }}>
+                <span className="tag" style={{ borderColor: 'rgba(16,185,129,0.28)' }}>
                   仅预览前 {MAX_PREVIEW_ROWS_FRONTEND} 行
                 </span>
               ) : null}
               {activeParseMode === 'engine' && engineLoadingRange ? (
-                <span className="tag" style={{ borderColor: 'rgba(74,217,222,0.22)' }}>
+                <span className="tag" style={{ borderColor: 'rgba(16,185,129,0.28)' }}>
                   正在拉取可视区数据...
                 </span>
               ) : null}
             </div>
-            <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+            <div style={{ color: 'var(--muted)', fontSize: 16 }}>
               列渲染限制：最多 {MAX_COLUMNS_RENDER} 列
               {activeParseMode === 'engine' && engineColumns && engineColumns.length > MAX_COLUMNS_RENDER ? (
                 <span style={{ marginLeft: 10, color: 'var(--text)' }}>
@@ -1117,7 +1171,13 @@ export default function Viewer() {
           ) : null}
 
           <div className="table-wrap" style={{ marginTop: 12 }}>
-            <div className="table-split" style={{ maxHeight: 680 }}>
+          <div 
+  className="table-split" 
+  style={{ 
+    maxHeight: `calc(100vh - 320px)`, // 基于视口高度动态计算，320px 为顶部控件区预留高度
+    minHeight: 400 // 保证最小高度
+  }}
+>
               {/* 左侧：固定行号列 */}
               <div className="index-pane" style={{ flex: '0 0 auto' }}>
                 <div className="table-header" style={{ minWidth: indexColWidth }}>
@@ -1163,6 +1223,7 @@ export default function Viewer() {
 
                 {/* body */}
                 {activeParseMode && listCount > 0 ? (
+
                   <List
                     className="data-list"
                     ref={listRef}
@@ -1170,9 +1231,9 @@ export default function Viewer() {
                     itemCount={listCount}
                     itemSize={itemSizeForRender}
                     width={effectiveColumns.length * colWidthForRender}
+                    overscanCount={10}
                     onItemsRendered={onItemsRendered}
                     onScroll={(props) => {
-                      // 以右侧 List 为驱动，同步左侧行号 List 的纵向滚动
                       if (props.scrollOffset != null) {
                         indexListRef.current?.scrollTo(props.scrollOffset)
                       }
@@ -1182,7 +1243,7 @@ export default function Viewer() {
                   </List>
                 ) : (
                   <div style={{ padding: 18, color: 'var(--muted)' }}>
-                    {busy ? '解析中...' : '还没有可展示的数据'}
+                    {busy ? '解析中...' : ''}
                   </div>
                 )}
               </div>
@@ -1197,13 +1258,13 @@ export default function Viewer() {
           actions={
             <>
               <button className="btn btn-primary" onClick={confirmQuickPreview}>
-                快速预览（前 {formatBytes(QUICK_PREVIEW_HEAD_BYTES)}，不上传）
+                快速预览
               </button>
               <button className="btn" onClick={confirmEngine}>
-                启用本地引擎（完整上传）
+                启用本地引擎
               </button>
               <button className="btn" onClick={confirmFrontend}>
-                整文件纯前端预览（可能卡顿）
+                纯前端预览
               </button>
               <button className="btn btn-danger" onClick={() => setShowEnginePrompt(false)}>
                 取消
@@ -1211,7 +1272,36 @@ export default function Viewer() {
             </>
           }
         >
-          文件大小 {fileSizeText} 超过阈值 {thresholdMB}MB。可先快速预览文件开头片段，或完整上传至本地引擎后再浏览全文。
+          <div style={{ textIndent: '2em', fontStyle: 'italic' }}>
+            当前文件大小为 <strong style={{ color: 'var(--text)' }}>{fileSizeText}</strong>，已超过阈值{' '}
+            <strong style={{ color: 'var(--text)' }}>{thresholdMB}MB</strong>；你可以先选择{' '}
+            <strong style={{ color: 'var(--text)' }}>快速预览</strong>（仅读取文件开头片段，不上传）以尽快查看数据结构，如需浏览完整数据，请选择{' '}
+            <strong style={{ color: 'var(--text)' }}>完整上传至本地引擎</strong> 后再继续。
+          </div>
+        </Modal>
+      ) : null}
+
+      {showReparseConfirm ? (
+        <Modal
+          title="检测到重复文件"
+          actions={
+            <>
+              <button className="btn btn-primary" onClick={confirmReparseSameFile}>
+                重新解析
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  setShowReparseConfirm(false)
+                  setPendingFile(null)
+                }}
+              >
+                取消
+              </button>
+            </>
+          }
+        >
+          你再次选择了同一个文件，是否确认重新解析？
         </Modal>
       ) : null}
 
@@ -1274,7 +1364,7 @@ export default function Viewer() {
           <div ref={previewCardRef} className={`preview-card ${previewMode === 'fullscreen' ? 'fullscreen' : ''}`}>
             <div className="preview-topbar">
               <div style={{ fontWeight: 900 }}>表格预览</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+              <div style={{ color: 'var(--muted)', fontSize: 16 }}>
                 模式：{previewMode === 'fullscreen' ? '全屏（占满电脑屏幕）' : '放大预览（占满浏览器）'}
               </div>
               <button className="btn btn-danger" onClick={() => void closePreview()}>
@@ -1283,7 +1373,7 @@ export default function Viewer() {
             </div>
             <div className="preview-body">
               <div className="table-wrap" style={{ marginTop: 0 }}>
-                <div className="table-split" style={{ maxHeight: previewMode === 'fullscreen' ? viewportH - 92 : viewportH - 92 }}>
+                <div className="table-split" style={{ maxHeight: previewTableAreaHeight }}>
                   {/* 左侧：固定行号列（预览） */}
                   <div className="index-pane" style={{ flex: '0 0 auto' }}>
                     <div className="table-header" style={{ minWidth: indexColWidth }}>
@@ -1299,7 +1389,7 @@ export default function Viewer() {
                       <List
                         className="index-list"
                         ref={previewIndexListRef}
-                        height={Math.max(420, (previewMode === 'fullscreen' ? viewportH - 92 : viewportH - 92) - 42)}
+                        height={previewListHeight}
                         itemCount={listCount}
                         itemSize={itemSizeForRender}
                         width={indexColWidth}
@@ -1329,7 +1419,7 @@ export default function Viewer() {
                       <List
                         className="data-list"
                         ref={previewListRef}
-                        height={Math.max(420, (previewMode === 'fullscreen' ? viewportH - 92 : viewportH - 92) - 42)}
+                        height={previewListHeight}
                         itemCount={listCount}
                         itemSize={itemSizeForRender}
                         width={effectiveColumns.length * colWidthForRender}

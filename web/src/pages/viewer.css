@@ -63,6 +63,37 @@
   color: var(--text);
 }
 
+/* 阈值数字输入：黑-翠绿主题 */
+.threshold-input{
+  border: 1px solid rgba(16,185,129,0.28);
+  background: linear-gradient(180deg, rgba(7,14,20,0.92), rgba(8,16,24,0.84));
+  color: rgba(209,250,229,0.96);
+  font-variant-numeric: tabular-nums;
+  padding-right: 8px;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.threshold-input:hover{
+  border-color: rgba(16,185,129,0.5);
+}
+.threshold-input:focus{
+  border-color: rgba(52,211,153,0.82);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.24), inset 0 0 0 1px rgba(52,211,153,0.18);
+}
+.threshold-input::-webkit-outer-spin-button,
+.threshold-input::-webkit-inner-spin-button{
+  -webkit-appearance: inner-spin-button;
+  opacity: 1;
+  margin: 0;
+  min-height: 30px;
+  width: 16px;
+  cursor: pointer;
+  filter: hue-rotate(32deg) saturate(1.35) brightness(1.08);
+}
+.threshold-input:hover::-webkit-outer-spin-button,
+.threshold-input:hover::-webkit-inner-spin-button{
+  filter: hue-rotate(32deg) saturate(1.55) brightness(1.18);
+}
+
 /* 自定义下拉（避免原生 select 在 Windows 上难以统一样式） */
 .cselect{
   position: relative;
@@ -75,8 +106,8 @@
   justify-content: space-between;
   gap: 12px;
   border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(16,185,129,0.28);
+  background: linear-gradient(180deg, rgba(7,14,20,0.92), rgba(8,16,24,0.84));
   color: var(--text);
   padding: 12px 14px;
   font-size: 14px;
@@ -89,11 +120,12 @@
   opacity: 0.7;
 }
 .cselect-btn:hover{
-  border-color: rgba(34,211,238,0.28);
+  border-color: rgba(16,185,129,0.55);
+  box-shadow: inset 0 0 0 1px rgba(16,185,129,0.22), 0 6px 18px rgba(16,185,129,0.14);
 }
 .cselect-btn:focus{
-  border-color: rgba(34,211,238,0.65);
-  box-shadow: 0 0 0 3px rgba(34,211,238,0.18);
+  border-color: rgba(52,211,153,0.85);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.28), inset 0 0 0 1px rgba(52,211,153,0.22);
 }
 .cselect-value{
   white-space: nowrap;
@@ -101,25 +133,31 @@
   text-overflow: ellipsis;
 }
 .cselect-arrow{
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 7px solid rgba(34,211,238,0.95);
-  margin-top: 2px;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
   flex: 0 0 auto;
+  transition: transform .18s ease;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.2 5.1 C3.2 4.6 3.7 4.2 4.2 4.2 H9.8 C10.3 4.2 10.8 4.6 10.8 5.1 C10.8 5.35 10.7 5.58 10.52 5.76 L7.72 8.56 C7.32 8.96 6.68 8.96 6.28 8.56 L3.48 5.76 C3.3 5.58 3.2 5.35 3.2 5.1 Z' fill='rgba(16,185,129,0.95)'/%3E%3C/svg%3E");
+}
+
+.cselect-btn[aria-expanded="true"] .cselect-arrow{
+  transform: rotate(180deg);
 }
 .cselect-menu{
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
   right: 0;
-  background: rgba(10,16,23,0.98);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(6,12,18,0.98), rgba(9,16,23,0.96));
+  border: 1px solid rgba(16,185,129,0.34);
   border-radius: 14px;
   padding: 8px;
   z-index: 80;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(16,185,129,0.14);
 }
 .cselect-item{
   padding: 10px 10px;
@@ -128,14 +166,18 @@
   cursor: pointer;
   font-size: 14px;
   user-select: none;
-  transition: background .12s ease, border-color .12s ease;
+  border: 1px solid transparent;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
 }
 .cselect-item:hover{
-  background: rgba(34,211,238,0.08);
+  background: rgba(16,185,129,0.10);
+  border-color: rgba(16,185,129,0.25);
+  color: rgba(167,243,208,0.98);
 }
 .cselect-item.active{
-  background: linear-gradient(135deg, rgba(34,211,238,0.18), rgba(124,58,237,0.14));
-  border: 1px solid rgba(34,211,238,0.38);
+  background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(52,211,153,0.16));
+  border: 1px solid rgba(16,185,129,0.48);
+  color: rgba(209,250,229,0.98);
 }
 
 .help{
@@ -163,13 +205,13 @@
 }
 .dropzone-title{
   font-weight: 850;
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(255,255,255,0.92);
 }
 .dropzone-sub{
   margin-top: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .dropzone-input{
@@ -202,7 +244,7 @@
 .table-wrap{
   margin-top: 16px;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--border);
   background: rgba(0,0,0,0.22);
 }
@@ -241,10 +283,12 @@
 }
 
 .index-cell{
-  background: rgba(15,23,42,0.95);
-  color: rgba(148,163,184,0.95);
+  background: linear-gradient(180deg, rgba(6,12,18,0.96), rgba(9,18,26,0.92));
+  color: rgba(110,231,183,0.95);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  border-right: 1px solid rgba(16,185,129,0.28);
+  text-shadow: 0 0 8px rgba(16,185,129,0.18);
 }
 
 .table-split{
@@ -253,18 +297,22 @@
 }
 
 .index-pane{
-  border-right: 1px solid rgba(148,163,184,0.24);
-  background: rgba(12,18,28,0.92);
-  box-shadow: inset -1px 0 0 rgba(0,0,0,0.32);
+  border-right: 1px solid rgba(16,185,129,0.34);
+  background: linear-gradient(180deg, rgba(5,10,16,0.96), rgba(8,15,23,0.92));
+  box-shadow: inset -1px 0 0 rgba(16,185,129,0.16), 1px 0 10px rgba(16,185,129,0.08);
 }
 
 .data-pane{
   min-width: 0;
+  padding-right: 10px;
+  box-sizing: border-box;
 }
 
 .data-list{
   /* 只让外层 div 负责横向滚动，这里隐藏内层横向滚动条 */
   overflow-x: hidden !important;
+  /* 预留纵向滚动条沟槽，视觉上不压住最右列 */
+  scrollbar-gutter: stable both-edges;
 }
 
 .index-list{
@@ -277,6 +325,49 @@
   height: 0;
 }
 
+/* 预览/表格滚动条：翠绿色主题 */
+.data-pane,
+.data-list,
+.table-wrap,
+.preview-body{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, 0.9) rgba(6, 12, 18, 0.7);
+}
+
+.data-pane::-webkit-scrollbar,
+.data-list::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar,
+.preview-body::-webkit-scrollbar{
+  width: 12px;
+  height: 12px;
+}
+
+.data-pane::-webkit-scrollbar-track,
+.data-list::-webkit-scrollbar-track,
+.table-wrap::-webkit-scrollbar-track,
+.preview-body::-webkit-scrollbar-track{
+  background: linear-gradient(180deg, rgba(6,12,18,0.82), rgba(8,16,24,0.72));
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+.data-pane::-webkit-scrollbar-thumb,
+.data-list::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb,
+.preview-body::-webkit-scrollbar-thumb{
+  background: linear-gradient(180deg, rgba(16,185,129,0.95), rgba(52,211,153,0.78));
+  border-radius: 999px;
+  border: 2px solid rgba(6,12,18,0.75);
+  box-shadow: 0 0 0 1px rgba(52,211,153,0.22), 0 0 12px rgba(16,185,129,0.26);
+}
+
+.data-pane::-webkit-scrollbar-thumb:hover,
+.data-list::-webkit-scrollbar-thumb:hover,
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.preview-body::-webkit-scrollbar-thumb:hover{
+  background: linear-gradient(180deg, rgba(16,185,129,1), rgba(52,211,153,0.95));
+}
+
 .table-row{
   display:flex;
   min-width: max-content;
@@ -284,6 +375,11 @@
 
 .table-row:hover .table-cell{
   background: rgba(34,211,238,0.06);
+}
+
+.table-row:hover .index-cell{
+  background: linear-gradient(180deg, rgba(6,16,20,0.98), rgba(10,24,26,0.94));
+  color: rgba(167,243,208,0.98);
 }
 
 .overlay{
@@ -298,11 +394,11 @@
 }
 
 .modal{
-  width: min(720px, 100%);
+  width: min(900px, 100%);
   background: rgba(10,16,23,0.95);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 18px;
+  padding: 24px;
   box-shadow: 0 24px 90px rgba(0,0,0,0.65);
 }
 
@@ -416,7 +512,9 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .preview-overlay.fullscreen{
@@ -426,20 +524,26 @@
 }
 
 .preview-card{
-  width: 100%;
-  height: 100%;
+  width: min(1700px, calc(100vw - 24px));
+  max-width: 100%;
+  height: calc(100vh - 24px);
+  max-height: calc(100vh - 24px);
   background: rgba(10,16,23,0.97);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: 14px;
+  padding-bottom: 0;
+  box-sizing: border-box;
   box-shadow: 0 30px 120px rgba(0,0,0,0.75);
   overflow: hidden;
   display:flex;
   flex-direction: column;
+  box-sizing: border-box; 
 }
 
-.preview-card.fullscreen{
-  width: 100%;
-  height: 100%;
+.preview-card.fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
   border-radius: 0;
 }
 
@@ -456,5 +560,6 @@
   flex: 1;
   overflow: hidden;
   padding: 12px;
+  box-sizing: border-box;
 }
 

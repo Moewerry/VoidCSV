@@ -8,11 +8,12 @@ export default function Home() {
     <div
       className="app-shell"
       style={{
-        minHeight: '50vh',
+        // minHeight: '50vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
+        fontSize: '200%',
       }}
     >
       <div
@@ -26,7 +27,7 @@ export default function Home() {
         }}
       >
         {/* 左侧：标题与介绍 */}
-        <div style={{ minWidth: 420 ,display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+        <div style={{ minWidth: 560 ,display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
           <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 0.2, lineHeight: 1 }}>
             VoidCSV
           </div>
@@ -59,21 +60,21 @@ export default function Home() {
         <div
           className="panel"
           style={{
-            width: 380,
+            width: 480,
             padding: 16,
             background: 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))',
           }}
         >
-          <div style={{ fontSize: 16, fontWeight: 800 }}>开始浏览</div>
-          <div style={{ marginTop: 8, color: 'var(--muted)', lineHeight: 1.6, fontSize: 13 }}>
+          <div style={{ fontSize: 24, fontWeight: 800 }}>开始浏览</div>
+          <div style={{ marginTop: 8, color: 'var(--muted)', lineHeight: 1.6, fontSize: 16 }}>
            智能调度解析，大小 CSV 皆可流畅预览
           </div>
 
           <div style={{ marginTop: 14, padding: 14, borderRadius: 14, border: '1px solid var(--border)', background: 'rgba(0,0,0,0.20)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>文件类型</div>
-                <div style={{ marginTop: 6, fontSize: 13 }}>CSV</div>
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>文件类型</div>
+                <div style={{ marginTop: 6, fontSize: 16 }}>CSV</div>
               </div>
               <div className="tag" style={{ padding: '6px 10px' }}>
                 <span className="kbd">2GB+</span> 支持

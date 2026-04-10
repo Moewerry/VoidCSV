@@ -8,7 +8,11 @@ const { nanoid } = require('nanoid')
 
 const app = express()
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8787
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads')
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads')
+const SESSION_MAX_AGE_MS = process.env.SESSION_MAX_AGE_MS ? Number(process.env.SESSION_MAX_AGE_MS) : 2 * 60 * 60 * 1000
+const CLEANUP_INTERVAL_MS = process.env.CLEANUP_INTERVAL_MS
+  ? Number(process.env.CLEANUP_INTERVAL_MS)
+  : 10 * 60 * 1000
 
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 
@@ -22,6 +26,36 @@ const upload = multer({
 
 // uploadId => session
 const sessions = new Map()
+
+function safeUnlink(filePath) {
+  if (!filePath) return
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+  } catch {}
+}
+
+function cleanupSession(uploadId, reason = 'expired') {
+  const s = sessions.get(uploadId)
+  if (!s) return false
+  safeUnlink(s.filePath)
+  sessions.delete(uploadId)
+  console.log(`[voidcsv-engine] cleanup session=${uploadId} reason=${reason}`)
+  return true
+}
+
+function cleanupExpiredSessions() {
+  const now = Date.now()
+  let removed = 0
+  for (const [uploadId, s] of sessions) {
+    const age = now - (s.createdAt || now)
+    if (age >= SESSION_MAX_AGE_MS || s.cancelled || s.stats?.state === 'cancelled') {
+      if (cleanupSession(uploadId, s.cancelled ? 'cancelled' : 'expired')) removed += 1
+    }
+  }
+  if (removed > 0) {
+    console.log(`[voidcsv-engine] cleanup removed=${removed}, remain=${sessions.size}`)
+  }
+}
 
 function getSession(uploadId) {
   const s = sessions.get(uploadId)
@@ -239,6 +273,8 @@ app.post('/api/cancel', (req, res) => {
     const s = getSession(uploadId)
     s.cancelled = true
     if (s.stats) s.stats.state = 'cancelled'
+    // 取消后立即清理上传文件，防止磁盘持续膨胀
+    cleanupSession(uploadId, 'cancelled-by-user')
     return res.json({ ok: true, uploadId })
   } catch (e) {
     res.status(400).json({ error: e.message || String(e) })
@@ -368,4 +404,9 @@ app.get('/api/rows', async (req, res) => {
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`[voidcsv-engine] listening on http://127.0.0.1:${PORT}`)
 })
+
+setInterval(cleanupExpiredSessions, CLEANUP_INTERVAL_MS)
+console.log(
+  `[voidcsv-engine] session cleanup enabled: maxAgeMs=${SESSION_MAX_AGE_MS}, intervalMs=${CLEANUP_INTERVAL_MS}`,
+)
 
