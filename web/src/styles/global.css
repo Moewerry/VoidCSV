@@ -6,20 +6,20 @@
   --text:#cdd6e0;
   --muted:#7f8a97;
   --border: rgba(255,255,255,0.08);
-  --accent:#10b981; /* 翠绿 */
-  --accent2:#34d399; /* 浅翠绿 */
+  --accent:#12d6c4; /* ?? */
+  --accent2:#3bd6ff; /* ?? */
   --danger:#fb7185;
-  --ok:#34d399;
+  --ok:#3bd6ff;
 }
 
 html{
-  /* 全局基础字号：整体偏小一档 */
+  /* ??????????????*/
   font-size: 14px;
   min-height: 100%;
   background-color: var(--bg0);
   background-image:
-    radial-gradient(1200px circle at 15% 10%, rgba(16,185,129,0.16), transparent 55%),
-    radial-gradient(900px circle at 85% 30%, rgba(52,211,153,0.12), transparent 50%);
+    radial-gradient(1200px circle at 15% 10%, rgba(18,214,196,0.16), transparent 55%),
+    radial-gradient(900px circle at 85% 30%, rgba(59,214,255,0.12), transparent 50%);
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
@@ -62,13 +62,13 @@ button, input, select{
   transition: transform .05s ease, border-color .15s ease, background .15s ease;
 }
 .btn:hover{
-  border-color: rgba(16,185,129,0.42);
-  background: rgba(16,185,129,0.09);
+  border-color: rgba(18,214,196,0.42);
+  background: rgba(18,214,196,0.09);
 }
 .btn:active{ transform: translateY(1px); }
 .btn-primary{
-  border-color: rgba(16,185,129,0.55);
-  background: linear-gradient(135deg, rgba(16,185,129,0.22), rgba(52,211,153,0.14));
+  border-color: rgba(18,214,196,0.55);
+  background: linear-gradient(135deg, rgba(18,214,196,0.22), rgba(59,214,255,0.14));
 }
 .btn-danger{
   border-color: rgba(251,113,133,0.45);

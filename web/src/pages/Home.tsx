@@ -27,9 +27,12 @@ export default function Home() {
         }}
       >
         {/* 左侧：标题与介绍 */}
-        <div style={{ minWidth: 560 ,display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
-          <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 0.2, lineHeight: 1 }}>
-            VoidCSV
+        <div style={{ minWidth: 560, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img src="/voidcsv.png" alt="VoidCSV logo" style={{ width: 48, height: 48, borderRadius: 10 }} />
+            <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 0.2, lineHeight: 1 }}>
+              oidCSV
+            </div>
           </div>
           <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <span
@@ -67,7 +70,7 @@ export default function Home() {
         >
           <div style={{ fontSize: 24, fontWeight: 800 }}>开始浏览</div>
           <div style={{ marginTop: 8, color: 'var(--muted)', lineHeight: 1.6, fontSize: 16 }}>
-           智能调度解析，大小 CSV 皆可流畅预览
+            智能调度解析，大小 CSV 皆可流畅预览
           </div>
 
           <div style={{ marginTop: 14, padding: 14, borderRadius: 14, border: '1px solid var(--border)', background: 'rgba(0,0,0,0.20)' }}>

@@ -75,7 +75,7 @@
   align-items: end;
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(16,185,129,0.24);
+  border: 1px solid rgba(18,214,196,0.24);
   background: linear-gradient(180deg, rgba(6,12,18,0.55), rgba(8,16,24,0.42));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   box-sizing: border-box;
@@ -91,7 +91,7 @@
 .viewer-field-label{
   font-size: 13px;
   line-height: 1.2;
-  color: rgba(167,243,208,0.72);
+  color: rgba(167,243,245,0.78);
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
@@ -207,9 +207,9 @@
 .threshold-input{
   width: 100%;
   font-size: 16px;
-  border: 1px solid rgba(16,185,129,0.28);
+  border: 1px solid rgba(18,214,196,0.28);
   background: linear-gradient(180deg, rgba(7,14,20,0.92), rgba(8,16,24,0.84));
-  color: rgba(209,250,229,0.96);
+  color: rgba(214,252,255,0.96);
   font-variant-numeric: tabular-nums;
   padding: 10px 34px 10px 12px;
   border-radius: 12px;
@@ -225,17 +225,17 @@
 }
 
 .threshold-input:hover{
-  border-color: rgba(16,185,129,0.5);
+  border-color: rgba(18,214,196,0.5);
 }
 
 .threshold-input:focus{
-  border-color: rgba(52,211,153,0.82);
-  box-shadow: 0 0 0 3px rgba(16,185,129,0.24), inset 0 0 0 1px rgba(52,211,153,0.18);
+  border-color: rgba(59,214,255,0.82);
+  box-shadow: 0 0 0 3px rgba(18,214,196,0.24), inset 0 0 0 1px rgba(59,214,255,0.18);
   outline: none;
 }
 
 .threshold-stepper:focus-within .threshold-stepper-btns{
-  border-color: rgba(52,211,153,0.55);
+  border-color: rgba(59,214,255,0.55);
 }
 
 .threshold-stepper-btns{
@@ -246,7 +246,7 @@
   width: 30px;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid rgba(16,185,129,0.28);
+  border-left: 1px solid rgba(18,214,196,0.28);
   border-radius: 0 11px 11px 0;
   overflow: hidden;
 }
@@ -263,7 +263,7 @@
 }
 
 .threshold-step-btn + .threshold-step-btn{
-  border-top: 1px solid rgba(16,185,129,0.22);
+  border-top: 1px solid rgba(18,214,196,0.22);
 }
 
 .threshold-step-btn::before{
@@ -275,7 +275,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 12px 12px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 L6 8 L9.5 4.5' stroke='rgba(110,231,183,0.95)' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 L6 8 L9.5 4.5' stroke='rgba(125,236,233,0.95)' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .threshold-step-btn--up::before{
@@ -283,17 +283,17 @@
 }
 
 .threshold-step-btn:hover{
-  background: linear-gradient(180deg, rgba(16,185,129,0.22), rgba(16,185,129,0.12));
+  background: linear-gradient(180deg, rgba(18,214,196,0.22), rgba(18,214,196,0.12));
 }
 
 .threshold-step-btn:active{
-  background: rgba(16,185,129,0.28);
+  background: rgba(18,214,196,0.28);
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.35);
 }
 
 .threshold-step-btn:focus-visible{
   outline: none;
-  box-shadow: inset 0 0 0 2px rgba(52,211,153,0.55);
+  box-shadow: inset 0 0 0 2px rgba(59,214,255,0.55);
   z-index: 1;
 }
 
@@ -309,7 +309,7 @@
   justify-content: space-between;
   gap: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(16,185,129,0.28);
+  border: 1px solid rgba(18,214,196,0.28);
   background: linear-gradient(180deg, rgba(7,14,20,0.92), rgba(8,16,24,0.84));
   color: var(--text);
   padding: 12px 14px;
@@ -323,12 +323,12 @@
   opacity: 0.7;
 }
 .cselect-btn:hover{
-  border-color: rgba(16,185,129,0.55);
-  box-shadow: inset 0 0 0 1px rgba(16,185,129,0.22), 0 6px 18px rgba(16,185,129,0.14);
+  border-color: rgba(18,214,196,0.55);
+  box-shadow: inset 0 0 0 1px rgba(18,214,196,0.22), 0 6px 18px rgba(18,214,196,0.14);
 }
 .cselect-btn:focus{
-  border-color: rgba(52,211,153,0.85);
-  box-shadow: 0 0 0 3px rgba(16,185,129,0.28), inset 0 0 0 1px rgba(52,211,153,0.22);
+  border-color: rgba(59,214,255,0.85);
+  box-shadow: 0 0 0 3px rgba(18,214,196,0.28), inset 0 0 0 1px rgba(59,214,255,0.22);
 }
 .cselect-value{
   white-space: nowrap;
@@ -344,7 +344,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 14px 14px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.2 5.1 C3.2 4.6 3.7 4.2 4.2 4.2 H9.8 C10.3 4.2 10.8 4.6 10.8 5.1 C10.8 5.35 10.7 5.58 10.52 5.76 L7.72 8.56 C7.32 8.96 6.68 8.96 6.28 8.56 L3.48 5.76 C3.3 5.58 3.2 5.35 3.2 5.1 Z' fill='rgba(16,185,129,0.95)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.2 5.1 C3.2 4.6 3.7 4.2 4.2 4.2 H9.8 C10.3 4.2 10.8 4.6 10.8 5.1 C10.8 5.35 10.7 5.58 10.52 5.76 L7.72 8.56 C7.32 8.96 6.68 8.96 6.28 8.56 L3.48 5.76 C3.3 5.58 3.2 5.35 3.2 5.1 Z' fill='rgba(18,214,196,0.95)'/%3E%3C/svg%3E");
 }
 
 .cselect-btn[aria-expanded="true"] .cselect-arrow{
@@ -356,11 +356,11 @@
   left: 0;
   right: 0;
   background: linear-gradient(180deg, rgba(6,12,18,0.98), rgba(9,16,23,0.96));
-  border: 1px solid rgba(16,185,129,0.34);
+  border: 1px solid rgba(18,214,196,0.34);
   border-radius: 14px;
   padding: 8px;
   z-index: 80;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(16,185,129,0.14);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(18,214,196,0.14);
 }
 .cselect-item{
   margin: 6px 0;
@@ -374,14 +374,14 @@
   transition: background .12s ease, border-color .12s ease, color .12s ease;
 }
 .cselect-item:hover{
-  background: rgba(16,185,129,0.10);
-  border-color: rgba(16,185,129,0.25);
-  color: rgba(167,243,208,0.98);
+  background: rgba(18,214,196,0.10);
+  border-color: rgba(18,214,196,0.25);
+  color: rgba(167,243,245,0.98);
 }
 .cselect-item.active{
-  background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(52,211,153,0.16));
-  border: 1px solid rgba(16,185,129,0.48);
-  color: rgba(209,250,229,0.98);
+  background: linear-gradient(135deg, rgba(18,214,196,0.2), rgba(59,214,255,0.16));
+  border: 1px solid rgba(18,214,196,0.48);
+  color: rgba(214,252,255,0.98);
 }
 
 .help{
@@ -501,11 +501,11 @@
 
 .index-cell{
   background: linear-gradient(180deg, rgba(6,12,18,0.96), rgba(9,18,26,0.92));
-  color: rgba(110,231,183,0.95);
+  color: rgba(125,236,233,0.95);
   font-variant-numeric: tabular-nums;
   text-align: right;
-  border-right: 1px solid rgba(16,185,129,0.28);
-  text-shadow: 0 0 8px rgba(16,185,129,0.18);
+  border-right: 1px solid rgba(18,214,196,0.28);
+  text-shadow: 0 0 8px rgba(18,214,196,0.18);
 }
 
 .table-split{
@@ -532,9 +532,9 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  border-right: 1px solid rgba(16,185,129,0.34);
+  border-right: 1px solid rgba(18,214,196,0.34);
   background: linear-gradient(180deg, rgba(5,10,16,0.96), rgba(8,15,23,0.92));
-  box-shadow: inset -1px 0 0 rgba(16,185,129,0.16), 1px 0 10px rgba(16,185,129,0.08);
+  box-shadow: inset -1px 0 0 rgba(18,214,196,0.16), 1px 0 10px rgba(18,214,196,0.08);
 }
 
 .data-pane{
@@ -594,17 +594,17 @@
 .data-list::-webkit-scrollbar-thumb,
 .table-wrap::-webkit-scrollbar-thumb,
 .preview-body::-webkit-scrollbar-thumb{
-  background: linear-gradient(180deg, rgba(16,185,129,0.95), rgba(52,211,153,0.78));
+  background: linear-gradient(180deg, rgba(18,214,196,0.95), rgba(59,214,255,0.78));
   border-radius: 999px;
   border: 2px solid rgba(6,12,18,0.75);
-  box-shadow: 0 0 0 1px rgba(52,211,153,0.22), 0 0 12px rgba(16,185,129,0.26);
+  box-shadow: 0 0 0 1px rgba(59,214,255,0.22), 0 0 12px rgba(18,214,196,0.26);
 }
 
 .data-pane::-webkit-scrollbar-thumb:hover,
 .data-list::-webkit-scrollbar-thumb:hover,
 .table-wrap::-webkit-scrollbar-thumb:hover,
 .preview-body::-webkit-scrollbar-thumb:hover{
-  background: linear-gradient(180deg, rgba(16,185,129,1), rgba(52,211,153,0.95));
+  background: linear-gradient(180deg, rgba(18,214,196,1), rgba(59,214,255,0.95));
 }
 
 .table-row{
@@ -618,7 +618,7 @@
 
 .table-row:hover .index-cell{
   background: linear-gradient(180deg, rgba(6,16,20,0.98), rgba(10,24,26,0.94));
-  color: rgba(167,243,208,0.98);
+  color: rgba(167,243,245,0.98);
 }
 
 .overlay{
