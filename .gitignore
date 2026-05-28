@@ -5,3 +5,8 @@ web/dist/
 engine/dist/
 uploads/
 
+# Docker（暂不入库）
+docker-compose.yml
+.dockerignore
+docker/
+

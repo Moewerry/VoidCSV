@@ -2,10 +2,26 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Papa from 'papaparse'
 import { FixedSizeList as List, ListOnItemsRenderedProps } from 'react-window'
+import * as XLSX from 'xlsx'
 import './viewer.css'
 import CustomSelect from '../components/CustomSelect'
 
 type EngineMode = 'auto' | 'engine' | 'frontend'
+
+const TABLE_HEADER_FALLBACK_PX = 42
+const TABLE_SPLIT_MIN_HEIGHT_PX = 280
+const TABLE_TOP_RESERVED_PX = 360
+
+function measureTableBodyHeight(splitEl: HTMLElement | null) {
+  if (!splitEl) return 360
+  const splitH = splitEl.getBoundingClientRect().height
+  if (splitH <= 0) return 360
+  const headerEl = splitEl.querySelector<HTMLElement>('.table-header')
+  const headerH = headerEl
+    ? Math.ceil(headerEl.getBoundingClientRect().height)
+    : TABLE_HEADER_FALLBACK_PX
+  return Math.max(120, Math.floor(splitH - headerH))
+}
 
 function formatBytes(bytes: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
@@ -192,6 +208,25 @@ async function engineStartIndex(uploadId: string) {
   return (await resp.json()) as { ok: boolean; uploadId: string }
 }
 
+function fileExtLower(name: string) {
+  const i = name.lastIndexOf('.')
+  if (i < 0) return ''
+  return name.slice(i + 1).toLowerCase()
+}
+
+function isXlsxFile(f: File) {
+  return fileExtLower(f.name) === 'xlsx'
+}
+
+async function parseXlsxTo2D(file: File) {
+  const buf = await file.arrayBuffer()
+  const wb = XLSX.read(buf, { type: 'array' })
+  const sheetName = wb.SheetNames?.[0]
+  if (!sheetName) return [] as any[][]
+  const ws = wb.Sheets[sheetName]
+  return XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' }) as any[][]
+}
+
 function Modal(props: { title: string; children: React.ReactNode; actions: React.ReactNode }) {
   return (
     <div className="overlay" role="dialog" aria-modal="true">
@@ -256,6 +291,10 @@ export default function Viewer() {
   const previewIndexListRef = useRef<List>(null)
   const previewListRef = useRef<List>(null)
   const previewCardRef = useRef<HTMLDivElement | null>(null)
+  const mainTableSplitRef = useRef<HTMLDivElement | null>(null)
+  const previewTableSplitRef = useRef<HTMLDivElement | null>(null)
+  const [mainListHeight, setMainListHeight] = useState(360)
+  const [previewListHeight, setPreviewListHeight] = useState(360)
 
   const [viewportH, setViewportH] = useState(() => (typeof window !== 'undefined' ? window.innerHeight : 900))
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -363,24 +402,12 @@ export default function Viewer() {
     return 34
   }, [previewOpen])
 
-  const listHeightForRender = useMemo(() => {
-    if (!previewOpen) return 620
-    const pad = previewMode === 'fullscreen' ? 0 : 52
-    return Math.max(420, viewportH - pad - 110)
-  }, [previewOpen, previewMode, viewportH])
+  const tableSplitMaxHeight = useMemo(
+    () => Math.max(TABLE_SPLIT_MIN_HEIGHT_PX, viewportH - TABLE_TOP_RESERVED_PX),
+    [viewportH],
+  )
 
-  const previewListHeight = useMemo(() => {
-    if (!previewOpen) return 620
-    // 全屏与放大预览统一可视高度策略
-    const height = viewportH * 0.89
-    return Math.max(400, Math.min(height, viewportH - 60))
-  }, [previewOpen, viewportH])
-
-  const previewTableAreaHeight = useMemo(() => {
-    // 表头高度改为动态获取（或固定 48px，预留更多余量）
-    const headerHeight = 48
-    return previewListHeight + headerHeight
-  }, [previewListHeight])
+  const listHeightForRender = previewOpen ? previewListHeight : mainListHeight
 
   async function parseFrontend(csvFile: File, options?: { headPreview?: boolean }) {
     const myToken = parseTokenRef.current
@@ -394,6 +421,52 @@ export default function Viewer() {
     setRows([])
     setFrontendTruncated(false)
     setTotalRows(0)
+
+    if (isXlsxFile(csvFile)) {
+      try {
+        const a2d = await parseXlsxTo2D(csvFile)
+        if (parseTokenRef.current !== myToken) return
+
+        const maxRows = MAX_PREVIEW_ROWS_FRONTEND
+        const allRows = (a2d || []).map((r) => (Array.isArray(r) ? r : [r])) as any[][]
+        const limited = allRows.slice(0, Math.min(allRows.length, maxRows + (hasHeader ? 1 : 0)))
+
+        let dataRows = limited
+        let maxCols = 0
+        for (const r of limited) maxCols = Math.max(maxCols, (r as any[]).length)
+
+        let cols: string[] = []
+        if (hasHeader && limited.length > 0) {
+          const headerRow = limited[0] as any[]
+          cols = Array.from({ length: maxCols }, (_, i) => {
+            const v = headerRow[i]
+            return v === undefined || v === null || String(v) === '' ? `col${i + 1}` : String(v)
+          })
+          dataRows = limited.slice(1)
+        } else {
+          cols = Array.from({ length: maxCols }, () => '')
+        }
+
+        const normalized: string[][] = (dataRows as any[][]).map((arr) => {
+          const rr = (arr || []).slice(0, cols.length)
+          while (rr.length < cols.length) rr.push('')
+          return rr.map((x) => String(x ?? ''))
+        })
+
+        setColumns(cols)
+        setFrontendTruncated(normalized.length >= maxRows)
+        setRows(normalized)
+        setTotalRows(normalized.length)
+        setFrontendParsedRows(normalized.length)
+        setBusy(false)
+        return
+      } catch (e: any) {
+        if (parseTokenRef.current !== myToken) return
+        setError(e?.message || '解析 xlsx 失败')
+        setBusy(false)
+        return
+      }
+    }
 
     let fileToParse = csvFile
     if (options?.headPreview) {
@@ -695,6 +768,40 @@ export default function Viewer() {
     return totalRows || 0
   }, [activeParseMode, engineTotalRows, totalRows])
 
+  useEffect(() => {
+    if (previewOpen) return
+    const el = mainTableSplitRef.current
+    if (!el) return
+
+    const measure = () => setMainListHeight(measureTableBodyHeight(el))
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [previewOpen, activeParseMode, listCount, viewportH, busy, enginePhase])
+
+  useEffect(() => {
+    if (!previewOpen) return
+    const el = previewTableSplitRef.current
+    if (!el) return
+
+    const measure = () => setPreviewListHeight(measureTableBodyHeight(el))
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [previewOpen, previewMode, activeParseMode, listCount, viewportH])
+
   const loadingTitle = useMemo(() => {
     if (!busy || !activeParseMode) return ''
     if (activeParseMode === 'frontend')
@@ -815,6 +922,11 @@ export default function Viewer() {
 
     // 选择策略
     const thresholdBytes = thresholdMB * 1024 * 1024
+    if (isXlsxFile(f)) {
+      setActiveParseMode('frontend')
+      void parseFrontend(f)
+      return
+    }
     if (engineMode === 'auto') {
       if (f.size > thresholdBytes) setShowEnginePrompt(true)
       else {
@@ -914,7 +1026,7 @@ export default function Viewer() {
       }}
     >
             <div>
-              <div style={{ fontWeight: 900, fontSize: 18 }}>CSV Viewer</div>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>CSV / XLSX Viewer</div>
               <div style={{ color: 'var(--muted)', fontSize: 16, marginTop: 4 }}>
                 自动检测文件大小，小文件纯前端，大文件提示启用本地引擎
               </div>
@@ -962,7 +1074,7 @@ export default function Viewer() {
                         id="csv-file"
                         className="dropzone-input"
                         type="file"
-                        accept=".csv,text/csv"
+                        accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         onChange={onFileChange}
                       />
                       <label htmlFor="csv-file" className="dropzone-inner" aria-label="选择 CSV 文件">
@@ -973,7 +1085,7 @@ export default function Viewer() {
                               ? '上传完成：点击开始解析'
                               : '拖拽到这里，或点击选择'}
                         </div>
-                        <div className="dropzone-sub">支持 .csv / text/csv，自动检测小文件/大文件策略</div>
+                        <div className="dropzone-sub">支持 .csv / .xlsx，自动检测小文件/大文件策略</div>
                       </label>
                     </div>
                 </div>
@@ -1171,15 +1283,16 @@ export default function Viewer() {
           ) : null}
 
           <div className="table-wrap" style={{ marginTop: 12 }}>
-          <div 
-  className="table-split" 
-  style={{ 
-    maxHeight: `calc(100vh - 320px)`, // 基于视口高度动态计算，320px 为顶部控件区预留高度
-    minHeight: 400 // 保证最小高度
-  }}
->
+          <div
+            ref={mainTableSplitRef}
+            className="table-split"
+            style={{
+              maxHeight: tableSplitMaxHeight,
+              minHeight: Math.min(400, tableSplitMaxHeight),
+            }}
+          >
               {/* 左侧：固定行号列 */}
-              <div className="index-pane" style={{ flex: '0 0 auto' }}>
+              <div className="index-pane">
                 <div className="table-header" style={{ minWidth: indexColWidth }}>
                   <div
                     className="th index-cell"
@@ -1373,9 +1486,9 @@ export default function Viewer() {
             </div>
             <div className="preview-body">
               <div className="table-wrap" style={{ marginTop: 0 }}>
-                <div className="table-split" style={{ maxHeight: previewTableAreaHeight }}>
+                <div ref={previewTableSplitRef} className="table-split table-split--fill">
                   {/* 左侧：固定行号列（预览） */}
-                  <div className="index-pane" style={{ flex: '0 0 auto' }}>
+                  <div className="index-pane">
                     <div className="table-header" style={{ minWidth: indexColWidth }}>
                       <div
                         className="th index-cell"

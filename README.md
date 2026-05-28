@@ -42,3 +42,26 @@ pnpm run dev
 
 说明：当前前端对 `/api/*` 的请求仍通过 Vite 代理转发到本机引擎（引擎默认只监听 `127.0.0.1`），因此无需把引擎端口开放到局域网。
 
+## Docker 启动
+在项目根目录 `VoidCSV` 执行：
+
+```bash
+docker compose up -d --build
+```
+
+启动后访问：
+- `http://localhost:18080/`
+
+常用命令：
+
+```bash
+# 查看日志
+docker compose logs -f
+
+# 停止并删除容器（保留上传数据卷）
+docker compose down
+
+# 停止并删除容器 + 数据卷（会清空 uploads）
+docker compose down -v
+```
+

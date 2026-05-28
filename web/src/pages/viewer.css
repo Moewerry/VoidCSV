@@ -244,7 +244,7 @@
 .table-wrap{
   margin-top: 16px;
   border-radius: 16px;
-  overflow: visible;
+  overflow: hidden;
   border: 1px solid var(--border);
   background: rgba(0,0,0,0.22);
 }
@@ -293,17 +293,37 @@
 
 .table-split{
   display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 0;
   background: linear-gradient(180deg, rgba(8,13,20,0.8), rgba(8,13,20,0.65));
 }
 
+.table-split--fill{
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+}
+
 .index-pane{
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   border-right: 1px solid rgba(16,185,129,0.34);
   background: linear-gradient(180deg, rgba(5,10,16,0.96), rgba(8,15,23,0.92));
   box-shadow: inset -1px 0 0 rgba(16,185,129,0.16), 1px 0 10px rgba(16,185,129,0.08);
 }
 
 .data-pane{
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding-right: 10px;
   box-sizing: border-box;
 }
@@ -561,5 +581,16 @@
   overflow: hidden;
   padding: 12px;
   box-sizing: border-box;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-body .table-wrap{
+  flex: 1;
+  min-height: 0;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
 }
 
