@@ -179,6 +179,7 @@
   box-shadow: 0 24px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(16,185,129,0.14);
 }
 .cselect-item{
+  margin: 4px 0;
   padding: 10px 10px;
   border-radius: 12px;
   color: var(--text);
