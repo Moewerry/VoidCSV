@@ -1224,11 +1224,7 @@ export default function Viewer() {
                     </div>
                   ) : null}
                 </div>
-              ) : (
-                <div className="help" style={{ marginTop: 10,fontSize: 16 }}>
-                  小文件用纯前端解析，大文件会弹出启用本地引擎的提示
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -1328,7 +1324,7 @@ export default function Viewer() {
             className="table-split"
             style={{
               maxHeight: tableSplitMaxHeight,
-              minHeight: Math.min(400, tableSplitMaxHeight),
+              minHeight: Math.min(390, tableSplitMaxHeight),
             }}
           >
               {/* 左侧：固定行号列 */}
