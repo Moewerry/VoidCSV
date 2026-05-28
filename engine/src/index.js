@@ -146,11 +146,43 @@ function normalizeDelimiter(d) {
   return d
 }
 
+function normalizeEncoding(encoding) {
+  const raw = String(encoding || 'utf8')
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, '-')
+  const aliases = {
+    utf8: 'utf8',
+    'utf-8': 'utf8',
+    utf16le: 'utf16le',
+    'utf-16le': 'utf16le',
+    utf16be: 'utf16be',
+    'utf-16be': 'utf16be',
+    gbk: 'gbk',
+    gb18030: 'gb18030',
+    gb2312: 'gb2312',
+    big5: 'big5',
+    'shift-jis': 'shift_jis',
+    sjis: 'shift_jis',
+    'euc-jp': 'euc-jp',
+    eucjp: 'euc-jp',
+    'euc-kr': 'euc-kr',
+    euckr: 'euc-kr',
+    'windows-1252': 'windows-1252',
+    cp1252: 'windows-1252',
+    latin1: 'iso-8859-1',
+    'iso-8859-1': 'iso-8859-1',
+    'windows-1251': 'windows-1251',
+    cp1251: 'windows-1251',
+  }
+  return aliases[raw] || raw.replace(/-/g, '_')
+}
+
 function decodeStreamMaybe(inputStream, encoding) {
-  const enc = (encoding || 'utf8').toLowerCase()
-  if (enc === 'utf8' || enc === 'utf-8') return inputStream
+  const enc = normalizeEncoding(encoding)
+  if (enc === 'utf8') return inputStream
   // 需要把原始字节流解码为 UTF-8 字符串，csv-parse 才能正确识别引号与换行
-  return inputStream.pipe(iconv.decodeStream(encoding))
+  return inputStream.pipe(iconv.decodeStream(enc))
 }
 
 function inferColumnsFromRecord(record, hasHeader) {

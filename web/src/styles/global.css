@@ -12,19 +12,24 @@
   --ok:#34d399;
 }
 
-html,body{
-  height:100%;
-  background: radial-gradient(1200px circle at 15% 10%, rgba(16,185,129,0.16), transparent 55%),
-              radial-gradient(900px circle at 85% 30%, rgba(52,211,153,0.12), transparent 50%),
-              var(--bg0);
-  color: var(--text);
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-}
-
 html{
   /* 全局基础字号：整体偏小一档 */
   font-size: 14px;
+  min-height: 100%;
+  background-color: var(--bg0);
+  background-image:
+    radial-gradient(1200px circle at 15% 10%, rgba(16,185,129,0.16), transparent 55%),
+    radial-gradient(900px circle at 85% 30%, rgba(52,211,153,0.12), transparent 50%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+body{
+  min-height: 100%;
+  margin: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
 
 *{ box-sizing:border-box; }
@@ -37,7 +42,7 @@ button, input, select{
 
 .app-shell{
   min-height:100vh;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 35%);
+  background: transparent;
 }
 
 .panel{

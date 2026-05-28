@@ -12,6 +12,22 @@ const TABLE_HEADER_FALLBACK_PX = 42
 const TABLE_SPLIT_MIN_HEIGHT_PX = 280
 const TABLE_TOP_RESERVED_PX = 360
 
+const ENCODING_OPTIONS = [
+  { value: 'utf8', label: 'UTF-8' },
+  { value: 'utf16le', label: 'UTF-16 LE' },
+  { value: 'utf16be', label: 'UTF-16 BE' },
+  { value: 'gb18030', label: 'GB18030' },
+  { value: 'gbk', label: 'GBK' },
+  { value: 'gb2312', label: 'GB2312' },
+  { value: 'big5', label: 'Big5（繁体）' },
+  { value: 'shift_jis', label: 'Shift_JIS（日文）' },
+  { value: 'euc-jp', label: 'EUC-JP（日文）' },
+  { value: 'euc-kr', label: 'EUC-KR（韩文）' },
+  { value: 'windows-1252', label: 'Windows-1252（西欧）' },
+  { value: 'iso-8859-1', label: 'ISO-8859-1（Latin-1）' },
+  { value: 'windows-1251', label: 'Windows-1251（西里尔）' },
+]
+
 function measureTableBodyHeight(splitEl: HTMLElement | null) {
   if (!splitEl) return 360
   const splitH = splitEl.getBoundingClientRect().height
@@ -1008,8 +1024,8 @@ export default function Viewer() {
   }
 
   return (
-    <div className="app-shell" style={{ fontSize: '150%' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: 20 }}>
+    <div className="app-shell viewer-shell" style={{ fontSize: '150%' }}>
+      <div className="viewer-page">
       <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
       <button type="button" className="btn" onClick={() => navigate('/')}>
         返回首页
@@ -1102,16 +1118,12 @@ export default function Viewer() {
                     ariaLabel="分隔符"
                   />
                 </div>
-                <div style={{ minWidth: 190 }}>
+                <div style={{ minWidth: 220 }}>
                   <div className="label">编码（引擎）</div>
                   <CustomSelect
                     value={encoding}
                     onChange={(v) => setEncoding(v)}
-                    options={[
-                      { value: 'utf8', label: 'utf8' },
-                      { value: 'gb18030', label: 'gb18030' },
-                      { value: 'gbk', label: 'gbk' },
-                    ]}
+                    options={ENCODING_OPTIONS}
                     ariaLabel="编码"
                   />
                 </div>
@@ -1222,7 +1234,7 @@ export default function Viewer() {
           </div>
         ) : null}
 
-        <div className="panel" style={{ marginTop: 12, padding: 14 }}>
+        <div className="panel viewer-result-panel" style={{ marginTop: 12, padding: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
               <span className="tag">
@@ -1288,7 +1300,10 @@ export default function Viewer() {
             className="table-split"
             style={{
               maxHeight: tableSplitMaxHeight,
-              minHeight: Math.min(400, tableSplitMaxHeight),
+              minHeight:
+                activeParseMode && listCount > 0
+                  ? Math.min(400, tableSplitMaxHeight)
+                  : 160,
             }}
           >
               {/* 左侧：固定行号列 */}
@@ -1317,7 +1332,7 @@ export default function Viewer() {
               </div>
 
               {/* 右侧：可横向滚动的数据区（列头 + 数据） */}
-              <div className="data-pane" style={{ flex: '1 1 auto', overflowX: 'auto', overflowY: 'hidden' }}>
+              <div className="data-pane">
                 {/* header */}
                 <div
                   className="table-header"
@@ -1513,7 +1528,7 @@ export default function Viewer() {
                   </div>
 
                   {/* 右侧：可横向滚动的数据区（预览） */}
-                  <div className="data-pane" style={{ flex: '1 1 auto', overflowX: 'auto', overflowY: 'hidden' }}>
+                  <div className="data-pane">
                     <div
                       className="table-header"
                       style={{ minWidth: effectiveColumns.length * colWidthForRender }}
