@@ -12,6 +12,14 @@ const TABLE_HEADER_FALLBACK_PX = 42
 const TABLE_SPLIT_MIN_HEIGHT_PX = 280
 const TABLE_TOP_RESERVED_PX = 360
 
+const VIEWER_DEFAULT_CONFIG = {
+  thresholdMB: 200,
+  engineMode: 'auto' as EngineMode,
+  hasHeader: true,
+  delimiter: ',',
+  encoding: 'utf8',
+}
+
 const ENCODING_OPTIONS = [
   { value: 'utf8', label: 'UTF-8' },
   { value: 'utf16le', label: 'UTF-16 LE' },
@@ -257,15 +265,15 @@ function Modal(props: { title: string; children: React.ReactNode; actions: React
 
 export default function Viewer() {
   const navigate = useNavigate()
-  const [thresholdMB, setThresholdMB] = useState(200)
-  const [engineMode, setEngineMode] = useState<EngineMode>('auto')
+  const [thresholdMB, setThresholdMB] = useState(VIEWER_DEFAULT_CONFIG.thresholdMB)
+  const [engineMode, setEngineMode] = useState<EngineMode>(VIEWER_DEFAULT_CONFIG.engineMode)
 
   const [file, setFile] = useState<File | null>(null)
   const [fileSizeText, setFileSizeText] = useState('')
   const [dragOver, setDragOver] = useState(false)
-  const [hasHeader, setHasHeader] = useState(true)
-  const [delimiter, setDelimiter] = useState(',')
-  const [encoding, setEncoding] = useState('utf8')
+  const [hasHeader, setHasHeader] = useState(VIEWER_DEFAULT_CONFIG.hasHeader)
+  const [delimiter, setDelimiter] = useState(VIEWER_DEFAULT_CONFIG.delimiter)
+  const [encoding, setEncoding] = useState(VIEWER_DEFAULT_CONFIG.encoding)
 
   const [showEnginePrompt, setShowEnginePrompt] = useState(false)
   const [showReparseConfirm, setShowReparseConfirm] = useState(false)
@@ -335,7 +343,7 @@ export default function Viewer() {
 
   const currentTableColumnsCount = effectiveColumns.length
 
-  function resetAll() {
+  function resetParseSession() {
     try {
       uploadXhrRef.current?.abort()
     } catch {
@@ -350,6 +358,9 @@ export default function Viewer() {
     setError(null)
     setBusy(false)
     setShowEnginePrompt(false)
+    setShowReparseConfirm(false)
+    setPendingFile(null)
+    setDragOver(false)
     setFrontendParsedRows(0)
     setEnginePhase('idle')
     parseTokenRef.current += 1
@@ -365,6 +376,26 @@ export default function Viewer() {
     setEngineBufferRows([])
     setEngineLoadingRange(false)
     setPreviewOpen(false)
+    setPreviewMode('zoom')
+  }
+
+  function resetViewerConfig() {
+    setThresholdMB(VIEWER_DEFAULT_CONFIG.thresholdMB)
+    setEngineMode(VIEWER_DEFAULT_CONFIG.engineMode)
+    setHasHeader(VIEWER_DEFAULT_CONFIG.hasHeader)
+    setDelimiter(VIEWER_DEFAULT_CONFIG.delimiter)
+    setEncoding(VIEWER_DEFAULT_CONFIG.encoding)
+  }
+
+  function resetAll() {
+    resetParseSession()
+    resetViewerConfig()
+  }
+
+  function handleHardReset() {
+    resetAll()
+    listRef.current?.scrollTo(0)
+    previewListRef.current?.scrollTo(0)
   }
 
   useEffect(() => {
@@ -776,7 +807,7 @@ export default function Viewer() {
         fetch(`/api/cancel?uploadId=${encodeURIComponent(id)}`, { method: 'POST' }).catch(() => {})
       }
     }
-    resetAll()
+    resetParseSession()
   }
 
   const listCount = useMemo(() => {
@@ -931,7 +962,7 @@ export default function Viewer() {
 
   function handleFile(f: File) {
     if (busy) return
-    resetAll()
+    resetParseSession()
     setFile(f)
     setFileSizeText(formatBytes(f.size))
     setError(null)
@@ -1031,40 +1062,20 @@ export default function Viewer() {
         返回首页
       </button>
     </div>
-    <div className="panel" style={{ padding: 20 }}>
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        gap: 12,
-        alignItems: 'center',
-        flexWrap: 'wrap',
-      }}
-    >
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 18 }}>CSV / XLSX Viewer</div>
-              <div style={{ color: 'var(--muted)', fontSize: 16, marginTop: 4 }}>
-                自动检测文件大小，小文件纯前端，大文件提示启用本地引擎
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
-                className="btn"
-                onClick={() => {
-                  resetAll()
-                  listRef.current?.scrollTo(0)
-                }}
-              >
-                重置
-              </button>
-            </div>
+    <div className="panel viewer-upload-panel" style={{ padding: 20 }}>
+          <div className="viewer-toolbar-reset">
+            <button
+              type="button"
+              className="btn"
+              onClick={handleHardReset}
+            >
+              重置
+            </button>
           </div>
-
-          <div className="row" style={{ marginTop: 14 }}>
+          <div className="row">
             <div className="controls">
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 260 }}>
-                  {/* <div className="label">选择 CSV 文件</div> */}
+              <div className="viewer-toolbar-row">
+                <div className="viewer-toolbar-upload">
                     <div
                       className={`dropzone ${dragOver ? 'drag' : ''}`}
                       onDragEnter={(e) => {
@@ -1105,39 +1116,41 @@ export default function Viewer() {
                       </label>
                     </div>
                 </div>
-                <div style={{ minWidth: 220 }}>
-                  <div className="label">分隔符</div>
-                  <CustomSelect
-                    value={delimiter}
-                    onChange={(v) => setDelimiter(v)}
-                    options={[
-                      { value: ',', label: ', 逗号' },
-                      { value: ';', label: '; 分号' },
-                      { value: '\\t', label: '<TAB>' },
-                    ]}
-                    ariaLabel="分隔符"
-                  />
-                </div>
-                <div style={{ minWidth: 220 }}>
-                  <div className="label">编码（引擎）</div>
-                  <CustomSelect
-                    value={encoding}
-                    onChange={(v) => setEncoding(v)}
-                    options={ENCODING_OPTIONS}
-                    ariaLabel="编码"
-                  />
-                </div>
-                <div style={{ minWidth: 190 }}>
-                  <div className="label">第一行表头</div>
-                  <CustomSelect
-                    value={String(hasHeader)}
-                    onChange={(v) => setHasHeader(v === 'true')}
-                    options={[
-                      { value: 'true', label: '是' },
-                      { value: 'false', label: '否' },
-                    ]}
-                    ariaLabel="第一行表头"
-                  />
+                <div className="viewer-options-group" role="group" aria-label="解析参数">
+                  <div className="viewer-field viewer-field--delimiter">
+                    <div className="viewer-field-label">分隔符</div>
+                    <CustomSelect
+                      value={delimiter}
+                      onChange={(v) => setDelimiter(v)}
+                      options={[
+                        { value: ',', label: ', 逗号' },
+                        { value: ';', label: '; 分号' },
+                        { value: '\\t', label: '<TAB>' },
+                      ]}
+                      ariaLabel="分隔符"
+                    />
+                  </div>
+                  <div className="viewer-field viewer-field--encoding">
+                    <div className="viewer-field-label">编码（引擎）</div>
+                    <CustomSelect
+                      value={encoding}
+                      onChange={(v) => setEncoding(v)}
+                      options={ENCODING_OPTIONS}
+                      ariaLabel="编码"
+                    />
+                  </div>
+                  <div className="viewer-field viewer-field--header">
+                    <div className="viewer-field-label">第一行表头</div>
+                    <CustomSelect
+                      value={String(hasHeader)}
+                      onChange={(v) => setHasHeader(v === 'true')}
+                      options={[
+                        { value: 'true', label: '是' },
+                        { value: 'false', label: '否' },
+                      ]}
+                      ariaLabel="第一行表头"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1159,15 +1172,30 @@ export default function Viewer() {
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <span className="label">阈值</span>
-                  <input
-                    className="input threshold-input"
-                    style={{ width: 120, fontSize: 16 }}
-                    type="number"
-                    min={10}
-                    step={10}
-                    value={thresholdMB}
-                    onChange={(e) => setThresholdMB(Number(e.target.value || 0))}
-                  />
+                  <div className="threshold-stepper">
+                    <input
+                      className="input threshold-input"
+                      type="number"
+                      min={10}
+                      step={10}
+                      value={thresholdMB}
+                      onChange={(e) => setThresholdMB(Number(e.target.value || 0))}
+                    />
+                    <div className="threshold-stepper-btns">
+                      <button
+                        type="button"
+                        className="threshold-step-btn threshold-step-btn--up"
+                        aria-label="增大阈值"
+                        onClick={() => setThresholdMB((v) => Math.max(10, v + 10))}
+                      />
+                      <button
+                        type="button"
+                        className="threshold-step-btn threshold-step-btn--down"
+                        aria-label="减小阈值"
+                        onClick={() => setThresholdMB((v) => Math.max(10, v - 10))}
+                      />
+                    </div>
+                  </div>
                   <span className="help">auto 模式下：文件大于阈值走引擎提示</span>
                 </div>
               </div>
@@ -1178,7 +1206,7 @@ export default function Viewer() {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       文件：<span className="file-name-ellipsis" style={{ color: 'var(--text)' }}>{file.name}</span> · 大小：{fileSizeText}
                     </div>
-                    <button className="btn btn-sm" onClick={() => resetAll()}>
+                    <button className="btn btn-sm" onClick={() => resetParseSession()}>
                       清空
                     </button>
                   </div>
@@ -1300,10 +1328,7 @@ export default function Viewer() {
             className="table-split"
             style={{
               maxHeight: tableSplitMaxHeight,
-              minHeight:
-                activeParseMode && listCount > 0
-                  ? Math.min(400, tableSplitMaxHeight)
-                  : 160,
+              minHeight: Math.min(400, tableSplitMaxHeight),
             }}
           >
               {/* 左侧：固定行号列 */}
