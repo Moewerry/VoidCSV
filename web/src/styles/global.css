@@ -20,6 +20,8 @@ html{
   background-image:
     radial-gradient(1200px circle at 15% 10%, rgba(18,214,196,0.16), transparent 55%),
     radial-gradient(900px circle at 85% 30%, rgba(59,214,255,0.12), transparent 50%);
+  background-size: 120% 120%, 130% 130%;
+  animation: bg-drift 18s ease-in-out infinite alternate;
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
@@ -111,5 +113,23 @@ button, input, select{
   align-items:center;
   justify-content: space-between;
   gap: 12px;
+}
+
+@keyframes bg-drift{
+  0%{
+    background-position: 12% 8%, 88% 28%;
+  }
+  50%{
+    background-position: 18% 14%, 82% 35%;
+  }
+  100%{
+    background-position: 10% 18%, 90% 22%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  html{
+    animation: none;
+  }
 }
 
