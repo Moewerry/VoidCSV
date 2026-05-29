@@ -4,6 +4,10 @@ engine/node_modules/
 web/dist/
 engine/dist/
 uploads/
+engine/uploads/
+release/
+dist/
+*.tsbuildinfo
 
 # Docker（暂不入库）
 docker-compose.yml

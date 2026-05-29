@@ -47,6 +47,27 @@ button, input, select{
   background: transparent;
 }
 
+.desktop-drag-shell{
+  min-height: 100vh;
+}
+
+.desktop-drag-bar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  z-index: 2000;
+  background: transparent;
+  -webkit-app-region: drag;
+  pointer-events: none;
+}
+
+.desktop-main-content{
+  min-height: 100vh;
+  -webkit-app-region: no-drag;
+}
+
 .panel{
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   border: 1px solid var(--border);

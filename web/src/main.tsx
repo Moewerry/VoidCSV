@@ -7,7 +7,12 @@ import './styles/global.css'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <div className="desktop-drag-shell">
+        <div className="desktop-drag-bar" aria-hidden="true" />
+        <div className="desktop-main-content">
+          <App />
+        </div>
+      </div>
     </BrowserRouter>
   </React.StrictMode>,
 )

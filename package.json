@@ -2,15 +2,73 @@
   "name": "voidcsv",
   "private": true,
   "version": "0.0.1",
+  "main": "desktop/main.cjs",
   "scripts": {
     "dev": "concurrently -k \"pnpm --dir web run dev\" \"pnpm --dir engine run dev\"",
     "build": "pnpm --dir web run build",
     "start": "pnpm --dir engine run start",
-    "clean": "rimraf web/dist engine/dist uploads"
+    "clean": "rimraf web/dist engine/dist uploads",
+    "desktop:dev": "concurrently -k \"pnpm --dir engine run dev\" \"pnpm --dir web run dev\" \"wait-on tcp:5173 tcp:8787 && electron ./desktop/main.cjs\"",
+    "desktop:prebuild": "taskkill /IM VoidCSV.exe /F || echo VoidCSV not running && taskkill /IM electron.exe /F || echo electron not running && node ./scripts/desktop-prebuild.cjs && node ./scripts/sync-icon.cjs",
+    "desktop:build": "npm run desktop:prebuild && pnpm --dir web run build && electron-builder --win",
+    "icon:sync": "node ./scripts/sync-icon.cjs"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.0",
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.5",
+    "iconv-lite": "^0.6.3",
+    "multer": "^1.4.5-lts.2",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
-    "rimraf": "^6.0.1"
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "rcedit": "^4.0.1",
+    "rimraf": "^6.0.1",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.voidcsv.desktop",
+    "productName": "VoidCSV",
+    "afterPack": "scripts/embed-win-icon.cjs",
+    "asarUnpack": [
+      "engine/**"
+    ],
+    "files": [
+      "desktop/**/*",
+      "engine/src/**/*",
+      "web/dist/**/*",
+      "web/public/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release/build",
+      "buildResources": "build"
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
 
