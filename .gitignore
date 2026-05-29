@@ -8,9 +8,5 @@ engine/uploads/
 release/
 dist/
 *.tsbuildinfo
-
-# Docker（暂不入库）
-docker-compose.yml
-.dockerignore
-docker/
+build/icon.ico
 

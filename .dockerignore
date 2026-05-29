@@ -1,0 +1,12 @@
+node_modules
+web/node_modules
+engine/node_modules
+web/dist
+engine/dist
+uploads
+engine/uploads
+release
+dist
+.git
+.cursor
+*.tsbuildinfo

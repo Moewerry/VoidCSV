@@ -1,5 +1,6 @@
 {
   "name": "voidcsv",
+  "description": "大文件 CSV/XLSX 网页查看器，小文件前端预览，大文件本地引擎渐进索引。",
   "private": true,
   "version": "0.0.1",
   "main": "desktop/main.cjs",

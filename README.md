@@ -1,67 +1,139 @@
 # VoidCSV
 
-使用网页方式浏览大文件 CSV（2GB+）的原型项目。
+> 大文件 CSV/XLSX 网页查看器，小文件前端预览，大文件本地引擎渐进索引。
 
-当前包含：
-- `web/` 前端（首页 + Viewer，混合模式：小文件纯前端 / 大文件提示启用本地引擎）
-- `engine/` 本地引擎服务（提供 `/api/*` 接口，先实现可运行的区间读取 MVP，后续再完善索引与性能）
+- **小文件**：浏览器内纯前端解析预览
+- **大文件**：通过本地引擎渐进索引与区间读取
 
-## 启动
-先安装依赖，然后启动开发环境。
+## 项目结构
+
+| 目录 | 说明 |
+|------|------|
+| `web/` | 前端（Vite + React） |
+| `engine/` | 本地引擎（Express，`/api/*`） |
+| `desktop/` | Electron 桌面版入口 |
+| `docker/` | Docker 镜像与 Nginx 配置 |
+
+## 本地开发
 
 ### 1) 安装依赖
-在项目根目录 `VoidCSV` 执行：
+
+在项目根目录执行：
+
 ```bash
 pnpm install
-```
-
-然后分别为 `web/` 和 `engine/` 安装依赖（因为它们各自有独立的 `package.json`）：
-```bash
 pnpm --dir web install
 pnpm --dir engine install
 ```
 
-### 2) 运行
+### 2) 启动
+
 ```bash
 pnpm run dev
 ```
 
-开发模式下：
-- 前端（Vite）：`http://localhost:5173/`
-- 本地引擎（Express）：`http://127.0.0.1:8787/`（前端会自动通过 `/api/*` 代理访问）
+- 前端：`http://localhost:5173/`
+- 引擎：`http://127.0.0.1:8787/`（开发期由 Vite 将 `/api/*` 代理到引擎）
 
 ### 3) 使用
-- 打开前端主页，点击 `进入浏览器`
-- 选择 CSV 文件：小文件走纯前端预览；大文件会弹提示启用本地引擎
 
-## 局域网访问
-1. 确保防火墙允许入站访问前端端口（默认 `5173`）。
-2. 在运行 `pnpm run dev` 的机器上，查找你的 IPv4 地址（例如 `192.168.1.x`）。
-3. 局域网其他设备用浏览器打开：
-   - `http://<你的IPv4>:5173/`
+打开主页 → **进入浏览器** → 选择 CSV / XLSX 文件。
 
-说明：当前前端对 `/api/*` 的请求仍通过 Vite 代理转发到本机引擎（引擎默认只监听 `127.0.0.1`），因此无需把引擎端口开放到局域网。
+## 局域网访问（开发模式）
 
-## Docker 启动
-在项目根目录 `VoidCSV` 执行：
+1. 防火墙放行前端端口（默认 `5173`）。
+2. 查本机 IPv4（如 `192.168.1.x`）。
+3. 其他设备访问：`http://<你的IPv4>:5173/`
+
+引擎默认只监听本机，经 Vite 代理访问，无需把 `8787` 暴露到局域网。
+
+## Docker 部署
+
+适合在服务器上一键启动「前端静态站 + 引擎 API」，无需本机安装 Node。
+
+### 架构
+
+```
+浏览器 → web (Nginx :18080) → /api/* 反代 → engine (:8787)
+                              → 静态资源 (web/dist)
+上传文件持久化在 Docker 卷 engine-uploads
+```
+
+### 前置要求
+
+- [Docker](https://docs.docker.com/get-docker/) 与 Docker Compose v2
+
+### 启动
+
+在项目根目录：
 
 ```bash
 docker compose up -d --build
 ```
 
-启动后访问：
-- `http://localhost:18080/`
+访问：**http://localhost:18080/**
 
-常用命令：
+> 对外端口为 `18080`（映射容器内 Nginx `80`），避免与常见 `8080` 冲突。可在 `docker-compose.yml` 中修改 `ports`。
+
+### 常用命令
 
 ```bash
 # 查看日志
 docker compose logs -f
 
-# 停止并删除容器（保留上传数据卷）
+# 仅重启
+docker compose restart
+
+# 停止（保留上传卷）
 docker compose down
 
-# 停止并删除容器 + 数据卷（会清空 uploads）
+# 停止并删除上传数据
 docker compose down -v
 ```
 
+### 引擎清理策略（可通过环境变量调整）
+
+| 变量 | 默认值 | 含义 |
+|------|--------|------|
+| `SESSION_MAX_AGE_MS` | 2h | 会话过期后删除上传文件 |
+| `CLEANUP_INTERVAL_MS` | 10min | 清理任务间隔 |
+| `FILE_MAX_AGE_MS` | 6h | 孤儿文件最大保留时间 |
+| `MAX_UPLOAD_DIR_BYTES` | 4GB | 上传目录容量上限，超出后删最旧文件 |
+
+修改方式：编辑 `docker-compose.yml` 中 `engine.environment`，然后 `docker compose up -d --build`。
+
+## Windows 桌面版
+
+需先安装根目录依赖（含 `electron`、`electron-builder`）：
+
+```bash
+npm install
+```
+
+构建 Windows 安装包与便携版：
+
+```bash
+npm run desktop:build
+```
+
+产物目录：`release/build/`
+
+- 便携版：`VoidCSV 0.0.1.exe`
+- 安装包：`VoidCSV Setup 0.0.1.exe`
+- 免安装目录：`win-unpacked/VoidCSV.exe`
+
+开发调试：
+
+```bash
+npm run desktop:dev
+```
+
+同步应用图标（从 `web/public/voidcsv.png` 生成 ICO）：
+
+```bash
+npm run icon:sync
+```
+
+## 生产部署（非 Docker）
+
+典型做法：Nginx 托管 `web/dist`，并将 `/api/` 反代到本机 `engine`（`127.0.0.1:8787`），引擎用 PM2 / systemd 守护。SPA 需配置 `try_files $uri $uri/ /index.html;`。
